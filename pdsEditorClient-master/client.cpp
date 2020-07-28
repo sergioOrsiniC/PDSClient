@@ -101,7 +101,7 @@ Client::Client(QWidget *parent, QTcpSocket* parentSocket, LoginInfo* info)
     userLabel->setBuddy(userLineEdit);
     auto pwdLabel = new QLabel(tr("User password:"));
     pwdLabel->setBuddy(pwdLineEdit);
-    auto nickLabel = new QLabel(tr("User password:"));
+    auto nickLabel = new QLabel(tr("User nickName:"));
     nickLabel->setBuddy(nickLineEdit);
 
     auto hostLabel = new QLabel(tr("&Server name:"));
