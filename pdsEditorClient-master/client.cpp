@@ -343,6 +343,8 @@ void Client::loginRead()
         }
         else {
             qDebug() << "loginread failed: " << " op was" << (char) op;
+            QMessageBox::information(this, tr("Client Editor") ,
+                                     tr("Utente Non trovato"));
             //FAIL
         }
     }
