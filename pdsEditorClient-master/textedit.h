@@ -119,8 +119,6 @@ private:
 public:
     QMap<quint32, User> _users;
     QMap<quint32, QTextCursor> _cursors;
-    quint32 getSiteId();
-    QString to_string();
     void process(const Message &m);
 private:
     std::vector<Symbol> _symbols;
@@ -137,16 +135,11 @@ public slots:
 public:
     QTcpSocket* tcpSocket = nullptr;
     QDataStream in;
-    QDataStream out;                        // per ora non serve
     void addUser(const User &u);
     void removeUser(quint32);
-    QStringList _files = {};
     void insertSymbols();
     std::vector<int> prefix(std::vector<int>, int, int);
     void adjustHeight();
-    
-signals:
-    void readyToShow();
 
 };
 
@@ -158,6 +151,7 @@ public:
     TextEdit(QWidget *parent = 0);
 
 protected:
+    // no need if there is no dialog!!!
     void virtual closeEvent(QCloseEvent *e) override;
 
 private slots:
@@ -183,7 +177,6 @@ private:
     void setupEditActions();
     void setupTextActions();
     void setupViewActions();
-    bool maybeSave();
     void setCurrentFileName(const QString &fileName);
 
     void mergeFormatOnWordOrSelection(const QTextCharFormat &format);

@@ -96,7 +96,6 @@ private:
     QTcpSocket *tcpSocket = nullptr;
 
     QDataStream in;
-    QString currentFortune;
 
     QComboBox *loginCombo = nullptr;
     QLineEdit *userLineEdit = nullptr;

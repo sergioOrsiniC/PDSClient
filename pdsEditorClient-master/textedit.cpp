@@ -171,10 +171,12 @@ TextEdit::TextEdit(QWidget *parent)
 
 void TextEdit::closeEvent(QCloseEvent *e)
 {
-    if (maybeSave())
-        e->accept();
-    else
-        e->ignore();
+//    if (maybeSave())
+//        e->accept();
+//    else
+//        e->ignore();
+    //maybe do a dialog or remove it
+    e->accept();
 }
 
 void TextEdit::setupFileActions()
@@ -337,12 +339,6 @@ void TextEdit::setupTextActions()
     comboSize->setCurrentIndex(standardSizes.indexOf(QApplication::font().pointSize()));
 
     connect(comboSize, QOverload<const QString &>::of(&QComboBox::activated), this, &TextEdit::textSize);
-}
-
-
-bool TextEdit::maybeSave()
-{
-    return true;
 }
 
 void TextEdit::setCurrentFileName(const QString &fileName)
@@ -612,13 +608,12 @@ MyQTextEdit::~MyQTextEdit(){}                   // se tolgo questo non ho la vta
 
 /* QDataStream operators */
 QDataStream &operator<<(QDataStream& out, const Symbol& sen){
-    QVector<int> qvect;
-    return out << sen.c << sen.count << sen.format << sen.siteid << qvect.fromStdVector(sen.fract);
+    return out << sen.c << sen.count << sen.format << sen.siteid <<QVector<int>(sen.fract.begin(), sen.fract.end());
 }
 QDataStream &operator>>(QDataStream& in, Symbol& rec){
     QVector<int> qvect;
     in >> rec.c >> rec.count >> rec.format >> rec.siteid >> qvect;
-    rec.fract = qvect.toStdVector();
+    rec.fract = std::vector<int>(qvect.begin(), qvect.end());
     return in;
 }
 
@@ -667,7 +662,7 @@ void MyQTextEdit::CatchChangeSignal(int pos, int rem, int add){
     std::vector<Symbol> _remNew;
 
     if(rem != 0){
-        if(rem > _symbols.size()){
+        if(rem > (int) _symbols.size()){
             if(add)
                 add -= rem - _symbols.size();
             rem = _symbols.size();
@@ -716,7 +711,7 @@ std::vector<int> MyQTextEdit::prefix(std::vector<int> id, int depth, int substit
 {
     std::vector<int> idCopy = {};
     for (int cpt = 0; cpt <= depth; cpt++) {
-        if (cpt < id.size()) {
+        if (cpt < (int) id.size()) {
             idCopy.push_back(id.at(cpt));
         }
         else {
@@ -730,8 +725,8 @@ void MyQTextEdit::localInsert(int index, QChar value, QTextCharFormat charFormat
 {
     std::vector<int> myfract = {};
 
-    auto before = _symbols.size() > index-1 ? _symbols.at(index-1).fract : std::vector<int>();
-    auto after = _symbols.size() > index ? _symbols.at(index).fract : std::vector<int>();
+    auto before = (int) _symbols.size() > index-1 ? _symbols.at(index-1).fract : std::vector<int>();
+    auto after = (int) _symbols.size() > index ? _symbols.at(index).fract : std::vector<int>();
 
     int depth = 0;
     int interval = 0;
@@ -840,7 +835,7 @@ int MyQTextEdit::fractcmp(Symbol s1, Symbol s2) {
 
     auto v1 = s1.fract;
     auto v2 = s2.fract;
-    while (v1.size() > digit && v2.size() > digit)
+    while ((int) v1.size() > digit && (int) v2.size() > digit)
     {
         cmp = v1.at(digit) - v2.at(digit);
         if(cmp!=0)
@@ -849,10 +844,10 @@ int MyQTextEdit::fractcmp(Symbol s1, Symbol s2) {
     }
 
     // until now vectors are equal but one may continue
-    if(v1.size() > digit && v1.at(digit) > 0)
+    if((int) v1.size() > digit && v1.at(digit) > 0)
         return 1;
 
-    if(v2.size() > digit && v2.at(digit) == 0)
+    if((int) v2.size() > digit && v2.at(digit) == 0)
          return -1;
 
     cmp = s1.siteid - s2.siteid;
