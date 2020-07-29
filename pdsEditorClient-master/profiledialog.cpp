@@ -53,10 +53,11 @@ ProfileDialog::ProfileDialog(QWidget *parent, User* user, QString *uname, QStrin
 
 void ProfileDialog::changesAccepted()
 {
-    *uname = userEdit->text();
-    *pw = pwEdit->text();
+    *uname = (userEdit->isModified()) ? *uname : userEdit->text();
+    *pw = (pwEdit->isModified()) ? *pw : pwEdit->text();
     user->nick = nickEdit->text();
-    user->icon = QImage(fileName).scaled(32, 32, Qt::IgnoreAspectRatio);
+    if (!fileName.isEmpty())
+        user->icon = QImage(fileName).scaled(32, 32, Qt::IgnoreAspectRatio);
     this->done(Accepted);
 }
 

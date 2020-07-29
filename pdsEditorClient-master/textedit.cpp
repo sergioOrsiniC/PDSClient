@@ -1276,8 +1276,10 @@ void MyQTextEdit::updateProfile()
         qDebug("sending an updated profile");
         out << 'u';
         out << User(*toChange);
-        out << QString(*uname);
-        out << QString(*pw);
+        QString output = (uname->isEmpty()) ? QString ("Unchanged") : QString(*uname);
+        out << output;
+        output = (pw->isEmpty()) ? QString ("Unchanged") : QString(*pw);
+        out << output;
 
         tcpSocket->write(block);
     }
