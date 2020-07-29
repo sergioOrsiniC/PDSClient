@@ -102,7 +102,8 @@ public:
 class MyQTextEdit: public QTextEdit{
     Q_OBJECT
 public:
-    MyQTextEdit(QWidget* p, QWidget* container);
+    MyQTextEdit(QWidget* p);
+    QWidget* container;
 public slots:
     void changeBgcolor(quint32, QColor);
     void updateProfile();

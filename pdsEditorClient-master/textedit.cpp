@@ -111,12 +111,11 @@ TextEdit::TextEdit(QWidget *parent)
 #endif
     setWindowTitle(QCoreApplication::applicationName());
 
-    QWidget* container = nullptr;
-    textEdit = new MyQTextEdit(this, container);
+    textEdit = new MyQTextEdit(this);
 
     dock = new QDockWidget(tr("Users"), this);
     dock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
-    dock->setWidget(container);
+    dock->setWidget(textEdit->container);
     addDockWidget(Qt::RightDockWidgetArea, dock);
 
     connect(textEdit, &QTextEdit::currentCharFormatChanged,
@@ -579,7 +578,7 @@ void TextEdit::colorChanged(const QColor &c)
 }
 
 
-MyQTextEdit::MyQTextEdit(QWidget* p, QWidget* container) : QTextEdit(p){
+MyQTextEdit::MyQTextEdit(QWidget* p) : QTextEdit(p){
 
     container = new QWidget();
     auto layout = new QHBoxLayout;
