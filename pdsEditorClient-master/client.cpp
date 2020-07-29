@@ -58,16 +58,16 @@ Client::Client(QWidget *parent, QTcpSocket* parentSocket, LoginInfo* info)
     : QDialog(parent)
     , hostCombo(new QComboBox)
     , portLineEdit(new QLineEdit)
+    , tcpSocket(parentSocket)
+    , nextButton(new QPushButton(tr("Next")))
+    , linkLineEdit(new QLineEdit)
+    , openLinkButton(new QPushButton(tr("Open link")))
     , loginCombo(new QComboBox)
     , userLineEdit(new QLineEdit)
-    , linkLineEdit(new QLineEdit)
     , pwdLineEdit(new QLineEdit)
     , nickLineEdit(new QLineEdit)
     , openCombo(new QComboBox)
     , fileCombo(new QComboBox)
-    , getFortuneButton(new QPushButton(tr("Next")))
-    , openLinkButton(new QPushButton(tr("Open link")))
-    , tcpSocket(parentSocket)
     , loginInfo(info)
 {
     setWindowFlags(windowFlags() & ~Qt::WindowContextHelpButtonHint);
@@ -119,8 +119,8 @@ Client::Client(QWidget *parent, QTcpSocket* parentSocket, LoginInfo* info)
     statusLabel = new QLabel(tr("This examples requires that you run the "
                                 "TextEdit Server as well."));
 
-    getFortuneButton->setDefault(true);
-    getFortuneButton->setEnabled(true);
+    nextButton->setDefault(true);
+    nextButton->setEnabled(true);
 
     loginCombo->addItems({"login", "signup"});
     loginCombo->setEnabled(false);
@@ -136,23 +136,26 @@ Client::Client(QWidget *parent, QTcpSocket* parentSocket, LoginInfo* info)
 
     auto buttonBox = new QDialogButtonBox;
     buttonBox->addButton(openLinkButton, QDialogButtonBox::ActionRole);
-    buttonBox->addButton(getFortuneButton, QDialogButtonBox::ActionRole);
+    buttonBox->addButton(nextButton, QDialogButtonBox::ActionRole);
     buttonBox->addButton(quitButton, QDialogButtonBox::RejectRole);
 
     in.setDevice(tcpSocket);
     in.setVersion(QDataStream::Qt_4_0);
 
-    connect(hostCombo, &QComboBox::editTextChanged,
-            this, &Client::enableGetFortuneButton);
-    connect(portLineEdit, &QLineEdit::textChanged,
-            this, &Client::enableGetFortuneButton);
-    connect(getFortuneButton, &QAbstractButton::clicked,
-            this, &Client::requestNewFortune);
     connect(openLinkButton, &QAbstractButton::clicked,
             this, &Client::openLink);
+
+    connect(hostCombo, &QComboBox::editTextChanged,
+            this, &Client::enableConnectToServerButton);
+    connect(portLineEdit, &QLineEdit::textChanged,
+            this, &Client::enableConnectToServerButton);
+
+    connect(nextButton, &QAbstractButton::clicked,
+            this, &Client::connectToServer);
+
     connect(quitButton, &QAbstractButton::clicked, this, &QWidget::close);
 
-    connect(tcpSocket, &QTcpSocket::connected, this, &Client::readFortune);
+    connect(tcpSocket, &QTcpSocket::connected, this, &Client::enableLogin);
 
     connect(tcpSocket, QOverload<QAbstractSocket::SocketError>::of(&QAbstractSocket::error),
             this, &Client::displayError);
@@ -203,28 +206,36 @@ Client::Client(QWidget *parent, QTcpSocket* parentSocket, LoginInfo* info)
 
 }
 
-void Client::requestNewFortune()
+void Client::connectToServer()
 {
-    getFortuneButton->setEnabled(false);
+    nextButton->setEnabled(false);
     tcpSocket->abort();
     tcpSocket->connectToHost(hostCombo->currentText(),
                              portLineEdit->text().toInt());
 }
 
-void Client::readFortune()
+void Client::enableLogin()
 {
 
     loginCombo->setEnabled(true);
     userLineEdit->setEnabled(true);
     pwdLineEdit->setEnabled(true);
 
-    statusLabel->setText("connected");
-    disconnect(getFortuneButton, &QAbstractButton::clicked,
-            this, &Client::requestNewFortune);
+    connect(userLineEdit, &QLineEdit::textChanged,
+            this, &Client::enableLoginButton);
+    connect(pwdLineEdit, &QLineEdit::textChanged,
+            this, &Client::enableLoginButton);
 
-    getFortuneButton->setEnabled(true);
-    connect(getFortuneButton, &QAbstractButton::clicked,
+    statusLabel->setText("connected");
+    disconnect(nextButton, &QAbstractButton::clicked,
+            this, &Client::connectToServer);
+
+    nextButton->setEnabled(false);
+    connect(nextButton, &QAbstractButton::clicked,
             this, &Client::loginTry);
+
+    // TODO: rivedere combo e magari rimuovere signform
+    // TODO: rimuovere nick????
     connect(loginCombo, &QComboBox::currentTextChanged, this, &Client::signForm);
 }
 
@@ -251,14 +262,25 @@ void Client::displayError(QAbstractSocket::SocketError socketError)
                                  .arg(tcpSocket->errorString()));
     }
 
-    getFortuneButton->setEnabled(true);
+    nextButton->setEnabled(true);
 }
 
-void Client::enableGetFortuneButton()
+void Client::enableConnectToServerButton()
 {
-    getFortuneButton->setEnabled(!hostCombo->currentText().isEmpty() &&
+    nextButton->setEnabled(!hostCombo->currentText().isEmpty() &&
                                  !portLineEdit->text().isEmpty());
+}
 
+void Client::enableLoginButton()
+{
+    nextButton->setEnabled(!userLineEdit->text().isEmpty() &&
+                                 !pwdLineEdit->text().isEmpty());
+}
+
+
+void Client::enableOpenButton()
+{
+    nextButton->setEnabled(!fileCombo->currentText().isEmpty());
 }
 
 void Client::sessionOpened()
@@ -267,10 +289,10 @@ void Client::sessionOpened()
     statusLabel->setText(tr("This examples requires that you run the "
                             "TextEdit Server as well."));
 
-    enableGetFortuneButton();
+    enableConnectToServerButton();
 }
 
-void Client::loginRead()
+void Client::loginResponse()
 {
     int op;
     uid = 0;
@@ -284,7 +306,7 @@ void Client::loginRead()
     in.startTransaction();
     in >> uid;
     if(in.commitTransaction()){
-        if(uid !=0 ){
+        if(uid != 0 ){
             // SUCCESS
             if(in.atEnd())
                 return;
@@ -294,15 +316,20 @@ void Client::loginRead()
                 return;
             openCombo->setEnabled(true);
 
+
             fileCombo->addItems(_files);
             fileCombo->setEnabled(true);
             fileCombo->setEditable(true);
 
-            disconnect(getFortuneButton, &QAbstractButton::clicked,
+            nextButton->setEnabled(!_files.empty());
+
+            connect(fileCombo, &QComboBox::editTextChanged,
+                    this, &Client::enableOpenButton);
+
+            disconnect(nextButton, &QAbstractButton::clicked,
                     this, &Client::loginTry);
 
-            getFortuneButton->setEnabled(true);
-            connect(getFortuneButton, &QAbstractButton::clicked,
+            connect(nextButton, &QAbstractButton::clicked,
                     this, &Client::fileTry);
 
         }
@@ -340,7 +367,7 @@ void Client::fileTry()
         }
         op = 'n';
     }
-    disconnect(tcpSocket, &QIODevice::readyRead, this, &Client::loginRead);
+    disconnect(tcpSocket, &QIODevice::readyRead, this, &Client::loginResponse);
 
     out << op;
 
@@ -348,17 +375,11 @@ void Client::fileTry()
 
     loginInfo->file = fileCombo->currentText();
     loginInfo->host = hostCombo->currentText();
-    qDebug() << portLineEdit->text().toInt();
     loginInfo->port = portLineEdit->text().toInt();
 
     tcpSocket->flush();
     tcpSocket->write(block);
     this->done(uid);
-
-}
-
-void Client::fileRead()
-{
 
 }
 
@@ -394,10 +415,11 @@ void Client::loginTry()
 
     out << userLineEdit->text();
     out << pwdLineEdit->text();
+    //nick da rimuovere?
     if(loginCombo->currentText()=="signup")
             out << nickLineEdit->text();
 
-    connect(tcpSocket, &QIODevice::readyRead, this, &Client::loginRead);
+    connect(tcpSocket, &QIODevice::readyRead, this, &Client::loginResponse);
 
     tcpSocket->write(block);
 

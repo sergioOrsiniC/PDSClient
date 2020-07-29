@@ -72,19 +72,17 @@ class Client : public QDialog
 public:
     explicit Client(QWidget *parent = nullptr, QTcpSocket* socket = nullptr, LoginInfo* loginInfo = nullptr);
 
-signals:
-    void waitingDocu();
-
 private slots:
-    void requestNewFortune();
-    void readFortune();
+    void connectToServer();
+    void enableLogin();
     void displayError(QAbstractSocket::SocketError socketError);
-    void enableGetFortuneButton();
+    void enableConnectToServerButton();
+    void enableLoginButton();
+    void enableOpenButton();
     void sessionOpened();
     void loginTry();
-    void loginRead();
+    void loginResponse();
     void fileTry();
-    void fileRead();
     void openLink();
     void signForm();
 private:
@@ -92,7 +90,7 @@ private:
     QComboBox *hostCombo = nullptr;
     QLineEdit *portLineEdit = nullptr;
     QLabel *statusLabel = nullptr;
-    QPushButton *getFortuneButton = nullptr;
+    QPushButton *nextButton = nullptr;
     QLineEdit *linkLineEdit = nullptr;
     QPushButton *openLinkButton = nullptr;
     QTcpSocket *tcpSocket = nullptr;
@@ -100,7 +98,6 @@ private:
     QDataStream in;
     QString currentFortune;
 
-    /* MY ADDS */
     QComboBox *loginCombo = nullptr;
     QLineEdit *userLineEdit = nullptr;
     QLineEdit *pwdLineEdit = nullptr;
@@ -110,7 +107,6 @@ private:
     QComboBox *fileCombo = nullptr;
 
     LoginInfo* loginInfo = nullptr;
-    /* END ADDS */
 
     int uid;
     QStringList _files = {};
