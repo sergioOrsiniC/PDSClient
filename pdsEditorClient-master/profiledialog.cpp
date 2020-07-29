@@ -56,8 +56,10 @@ void ProfileDialog::changesAccepted()
     *uname = (userEdit->isModified()) ? *uname : userEdit->text();
     *pw = (pwEdit->isModified()) ? *pw : pwEdit->text();
     user->nick = nickEdit->text();
-    if (!fileName.isEmpty())
+    if (!fileName.isEmpty()){
         user->icon = QImage(fileName).scaled(32, 32, Qt::IgnoreAspectRatio);
+        user->icon = user->icon.convertToFormat(QImage::Format_RGB32);
+    }
     this->done(Accepted);
 }
 
