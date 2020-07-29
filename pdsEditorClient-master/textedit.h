@@ -69,7 +69,6 @@ QT_END_NAMESPACE
 #include <QTextEdit>
 #include "userscrolllist.h"
 #include "userlist.h"
-#include "user.h"
 #include "logininfo.h"
 
 class Symbol {
@@ -103,44 +102,35 @@ public:
 class MyQTextEdit: public QTextEdit{
     Q_OBJECT
 public:
-    MyQTextEdit(QWidget* p);
-    ~MyQTextEdit();
-    void paintEvent(QPaintEvent *e);
-    void localInsert(int i, QChar i1, QTextCharFormat f);
-    void localErase(int i);
-    int fractcmp(Symbol s1, Symbol s2);
-    UserList* _userList = nullptr;
-    UserScrollList* _userScrollList = nullptr;
-    QWidget* container = nullptr;
-    LoginInfo* loginInfo = nullptr;
-private:
-
-    quint32 _siteId = 0;
-public:
-    QMap<quint32, User> _users;
-    QMap<quint32, QTextCursor> _cursors;
-    void process(const Message &m);
-private:
-    std::vector<Symbol> _symbols;
-    int _counter = 0;
-
+    MyQTextEdit(QWidget* p, QWidget* container);
 public slots:
-    void docuReady();
     void changeBgcolor(quint32, QColor);
     void updateProfile();
     void CatchChangeSignal(int pos, int rem, int add);
     void readMessage();
     void generateLink();
-
-public:
+private:
+    UserList* _userList = nullptr;
+    UserScrollList* _userScrollList = nullptr;
+    LoginInfo* loginInfo = nullptr;
+    QMap<quint32, User> _users;
+    QMap<quint32, QTextCursor> _cursors;
+    std::vector<Symbol> _symbols;
+    int _counter = 0;
+    quint32 _siteId = 0;
     QTcpSocket* tcpSocket = nullptr;
     QDataStream in;
+
+    void paintEvent(QPaintEvent *e);
+    void localInsert(int i, QChar i1, QTextCharFormat f);
+    void localErase(int i);
+    int fractcmp(Symbol s1, Symbol s2);
+    void process(const Message &m);
     void addUser(const User &u);
     void removeUser(quint32);
     void insertSymbols();
     std::vector<int> prefix(std::vector<int>, int, int);
     void adjustHeight();
-
 };
 
 class TextEdit : public QMainWindow

@@ -111,11 +111,12 @@ TextEdit::TextEdit(QWidget *parent)
 #endif
     setWindowTitle(QCoreApplication::applicationName());
 
-    textEdit = new MyQTextEdit(this);
+    QWidget* container = nullptr;
+    textEdit = new MyQTextEdit(this, container);
 
     dock = new QDockWidget(tr("Users"), this);
     dock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
-    dock->setWidget(textEdit->container);
+    dock->setWidget(container);
     addDockWidget(Qt::RightDockWidgetArea, dock);
 
     connect(textEdit, &QTextEdit::currentCharFormatChanged,
@@ -578,7 +579,7 @@ void TextEdit::colorChanged(const QColor &c)
 }
 
 
-MyQTextEdit::MyQTextEdit(QWidget* p) : QTextEdit(p){
+MyQTextEdit::MyQTextEdit(QWidget* p, QWidget* container) : QTextEdit(p){
 
     container = new QWidget();
     auto layout = new QHBoxLayout;
@@ -600,11 +601,9 @@ MyQTextEdit::MyQTextEdit(QWidget* p) : QTextEdit(p){
     in.setVersion(QDataStream::Qt_4_0);
     connect(tcpSocket, &QIODevice::readyRead, this, &MyQTextEdit::readMessage);
 
-    //adjustHeight();
+    adjustHeight();
 
 }
-
-MyQTextEdit::~MyQTextEdit(){}                   // se tolgo questo non ho la vtable ?
 
 /* QDataStream operators */
 QDataStream &operator<<(QDataStream& out, const Symbol& sen){
@@ -953,16 +952,6 @@ void MyQTextEdit::adjustHeight()
     }
 }
 
-void MyQTextEdit::docuReady()
-{
-
-    adjustHeight();
-
-    connect(tcpSocket, &QIODevice::readyRead, this, &MyQTextEdit::readMessage);
-    in.setDevice(tcpSocket);
-    in.setVersion(QDataStream::Qt_4_0);
-}
-
 void MyQTextEdit::changeBgcolor(quint32 uid, QColor newColor){
 
     if(!_users.contains(uid)){
@@ -1084,7 +1073,7 @@ void MyQTextEdit::generateLink()
     clipboard->setText(link.toString());
     QMessageBox msgBox;
     msgBox.setTextInteractionFlags(Qt::TextInteractionFlag::TextSelectableByMouse);
-    msgBox.setText("The link copied in your clipboard " + link.toString());
+    msgBox.setText("The link copied in your clipboard: " + link.toString());
     msgBox.exec();
 }
 

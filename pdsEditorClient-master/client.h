@@ -86,7 +86,6 @@ private slots:
     void openLink();
     void signForm();
 private:
-
     QComboBox *hostCombo = nullptr;
     QLineEdit *portLineEdit = nullptr;
     QLabel *statusLabel = nullptr;
