@@ -370,9 +370,28 @@ void TextEdit::filePrintPdf()
     QPrinter printer(QPrinter::HighResolution);
     printer.setOutputFormat(QPrinter::PdfFormat);
     printer.setOutputFileName(fileName);
-    textEdit->document()->print(&printer);
+
+    QTextDocument* doc = new QTextDocument();
+    QTextCursor pdf(doc);
+
+    pdf.beginEditBlock();
+    QTextCursor init(textEdit->document());
+    for(int i=0; !init.atEnd(); i++){
+        init.movePosition(QTextCursor::NextCharacter, QTextCursor::KeepAnchor);
+        QTextCharFormat newFormat(init.charFormat());
+        newFormat.clearBackground();
+        pdf.insertText(init.selectedText(), newFormat);
+        init.setPosition(i);
+    }
+    pdf.endEditBlock();
+
+
+    doc->print(&printer);
     statusBar()->showMessage(tr("Exported \"%1\"")
                              .arg(QDir::toNativeSeparators(fileName)));
+
+    delete doc;
+
 //! [0]
 #endif
 }
