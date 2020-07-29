@@ -62,7 +62,6 @@ class QLabel;
 class QLineEdit;
 class QPushButton;
 class QTcpSocket;
-class QNetworkSession;
 QT_END_NAMESPACE
 
 
@@ -100,8 +99,6 @@ private:
 
     QDataStream in;
     QString currentFortune;
-
-    QNetworkSession *networkSession = nullptr;
 
     /* MY ADDS */
     QComboBox *loginCombo = nullptr;
