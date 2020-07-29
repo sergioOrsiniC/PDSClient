@@ -65,12 +65,10 @@ class QMenu;
 class QPrinter;
 QT_END_NAMESPACE
 
-/* MY ADD START */
 #include <QTextCursor>
 #include <QTextEdit>
 #include "userscrolllist.h"
 #include "userlist.h"
-#include "user.h"
 #include "logininfo.h"
 
 class Symbol {
@@ -84,7 +82,7 @@ public:
     quint32 siteid = 0;
     int count = 0;
     std::vector<int> fract = {};
-    QTextCharFormat format;         // ANCORA DA IMPLEMENTARE, probabilmente la property alignment sarà dura
+    QTextCharFormat format;
 };
 
 class Message {
@@ -105,62 +103,37 @@ class MyQTextEdit: public QTextEdit{
     Q_OBJECT
 public:
     MyQTextEdit(QWidget* p);
-    ~MyQTextEdit();
+    QWidget* container;
+    LoginInfo *getLoginInfo() const;
+public slots:
+    void changeBgcolor(quint32, QColor);
+    void updateProfile();
+    void CatchChangeSignal(int pos, int rem, int add);
+    void readMessage();
+    void generateLink();
+private:
+    UserList* _userList = nullptr;
+    UserScrollList* _userScrollList = nullptr;
+    LoginInfo* loginInfo = nullptr;
+    QMap<quint32, User> _users;
+    QMap<quint32, QTextCursor> _cursors;
+    std::vector<Symbol> _symbols;
+    int _counter = 0;
+    quint32 _siteId = 0;
+    QTcpSocket* tcpSocket = nullptr;
+    QDataStream in;
+
     void paintEvent(QPaintEvent *e);
     void localInsert(int i, QChar i1, QTextCharFormat f);
     void localErase(int i);
     int fractcmp(Symbol s1, Symbol s2);
-    UserList* _userList = nullptr;
-    UserScrollList* _userScrollList = nullptr;
-    QWidget* container = nullptr;
-    LoginInfo* loginInfo = nullptr;
-private:
-
-    quint32 _siteId = 0;
-public:
-    QMap<quint32, User> _users;
-    QMap<quint32, QTextCursor> _cursors;
-    quint32 getSiteId();
-    QString to_string();
     void process(const Message &m);
-private:
-    std::vector<Symbol> _symbols;
-    int _counter = 0;
-
-public slots:
-    /* changeBgcolor()
-     * function to change user's bgcolor both retro and pro - actively
-     * to be called by the client when selecting a color in the sidebar(?)
-     * that is to be connect
-     */
-    void docuReady();
-    void changeBgcolor(quint32, QColor);
-    void updateProfile();
-    void CatchChangeSignal(int pos, int rem, int add);      // move to private?
-    void readMessage();
-    void generateLink();
-
-
-// last hot stuff
-public:
-    QTcpSocket* tcpSocket = nullptr;
-    QDataStream in;                         // sarà da collegare al socket
-    QDataStream out;                        // per ora non serve
     void addUser(const User &u);
     void removeUser(quint32);
-    QStringList _files = {};
-    void fakeNewFile();                // warning to be fixed!!!
-    void fakeOpenFile();                // likewise
     void insertSymbols();
     std::vector<int> prefix(std::vector<int>, int, int);
     void adjustHeight();
-    
-signals:
-    void readyToShow();
-
 };
-
-/* MY ADD END */
 
 class TextEdit : public QMainWindow
 {
@@ -169,19 +142,12 @@ class TextEdit : public QMainWindow
 public:
     TextEdit(QWidget *parent = 0);
 
-    //bool load(const QString &f);
-
-public slots:
-    //void fileNew();
 protected:
+    // no need if there is no dialog!!!
     void virtual closeEvent(QCloseEvent *e) override;
 
 private slots:
-//    void fileOpen();
-//    bool fileSave();
-//    bool fileSaveAs();
-//    void filePrint();
-//    void filePrintPreview();
+
     void filePrintPdf();
 
     void textBold();
@@ -191,27 +157,23 @@ private slots:
     void textSize(const QString &p);
     void textStyle(int styleIndex);
     void textColor();
-    //void textAlign(QAction *a);
 
     void currentCharFormatChanged(const QTextCharFormat &format);
     void cursorPositionChanged();
 
     void clipboardDataChanged();
     void about();
-    //void printPreview(QPrinter *);
 
 private:
     void setupFileActions();
     void setupEditActions();
     void setupTextActions();
     void setupViewActions();
-    bool maybeSave();
     void setCurrentFileName(const QString &fileName);
 
     void mergeFormatOnWordOrSelection(const QTextCharFormat &format);
     void fontChanged(const QFont &f);
     void colorChanged(const QColor &c);
-    //void alignmentChanged(Qt::Alignment a);
 
     QDockWidget *dock;
     QAction *actionDock;
@@ -220,10 +182,6 @@ private:
     QAction *actionTextUnderline;
     QAction *actionTextItalic;
     QAction *actionTextColor;
-//    QAction *actionAlignLeft;
-//    QAction *actionAlignCenter;
-//    QAction *actionAlignRight;
-//    QAction *actionAlignJustify;
     QAction *actionUndo;
     QAction *actionRedo;
 #ifndef QT_NO_CLIPBOARD
@@ -238,7 +196,7 @@ private:
 
     QToolBar *tb;
     QString fileName;
-    MyQTextEdit *textEdit;                          // ONLY CHANGE
+    MyQTextEdit *textEdit;
 
 };
 

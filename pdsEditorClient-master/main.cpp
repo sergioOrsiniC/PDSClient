@@ -64,13 +64,6 @@ int main(int argc, char *argv[])
     QCoreApplication::setOrganizationName("PDS2019");
     QCoreApplication::setApplicationName("Progetto Editor");
     QCoreApplication::setApplicationVersion(QT_VERSION_STR);
-    QCommandLineParser parser;
-    parser.setApplicationDescription(QCoreApplication::applicationName());
-    parser.addHelpOption();
-    parser.addVersionOption();
-    // maybe use arguments to open links?
-    parser.addPositionalArgument("file", "The file to open.");
-    parser.process(a);
 
     TextEdit mw;
 

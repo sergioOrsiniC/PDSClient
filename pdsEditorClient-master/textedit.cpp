@@ -111,7 +111,7 @@ TextEdit::TextEdit(QWidget *parent)
 #endif
     setWindowTitle(QCoreApplication::applicationName());
 
-    textEdit = new MyQTextEdit(this);                       // MY ONLY CHANGES HERE
+    textEdit = new MyQTextEdit(this);
 
     dock = new QDockWidget(tr("Users"), this);
     dock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
@@ -130,30 +130,20 @@ TextEdit::TextEdit(QWidget *parent)
     setupTextActions();
     setupViewActions();
 
-//    {
-//        QMenu *helpMenu = menuBar()->addMenu(tr("Help"));
-//        helpMenu->addAction(tr("About"), this, &TextEdit::about);
-//        helpMenu->addAction(tr("About &Qt"), qApp, &QApplication::aboutQt);
-//    }
-
     QFont textFont("Helvetica");
     textFont.setStyleHint(QFont::SansSerif);
     textEdit->setFont(textFont);
     fontChanged(textEdit->font());
     colorChanged(textEdit->textColor());
-    //alignmentChanged(textEdit->alignment());
 
 //    connect(textEdit->document(), &QTextDocument::modificationChanged,
-//            actionSave, &QAction::setEnabled);
-    connect(textEdit->document(), &QTextDocument::modificationChanged,
-            this, &QWidget::setWindowModified);
+//            this, &QWidget::setWindowModified);
     connect(textEdit->document(), &QTextDocument::undoAvailable,
             actionUndo, &QAction::setEnabled);
     connect(textEdit->document(), &QTextDocument::redoAvailable,
             actionRedo, &QAction::setEnabled);
 
-    setWindowModified(textEdit->document()->isModified());
-//    actionSave->setEnabled(textEdit->document()->isModified());
+//    setWindowModified(textEdit->document()->isModified());
     actionUndo->setEnabled(textEdit->document()->isUndoAvailable());
     actionRedo->setEnabled(textEdit->document()->isRedoAvailable());
 
@@ -167,7 +157,7 @@ TextEdit::TextEdit(QWidget *parent)
 #endif
 
     textEdit->setFocus();
-    setCurrentFileName(QString());
+    setCurrentFileName(textEdit->getLoginInfo()->file);
 
 #ifdef Q_OS_MACOS
     // Use dark text on light background on macOS, also in dark mode.
@@ -181,10 +171,12 @@ TextEdit::TextEdit(QWidget *parent)
 
 void TextEdit::closeEvent(QCloseEvent *e)
 {
-    if (maybeSave())
-        e->accept();
-    else
-        e->ignore();
+//    if (maybeSave())
+//        e->accept();
+//    else
+//        e->ignore();
+    //maybe do a dialog or remove it
+    e->accept();
 }
 
 void TextEdit::setupFileActions()
@@ -192,38 +184,8 @@ void TextEdit::setupFileActions()
     QToolBar *tb = addToolBar(tr("File Actions"));
     QMenu *menu = menuBar()->addMenu(tr("&File"));
 
-//    const QIcon newIcon = QIcon::fromTheme("document-new", QIcon(rsrcPath + "/filenew.png"));
-//    QAction *a = menu->addAction(newIcon,  tr("&New"), this, &TextEdit::fileNew);
-//    tb->addAction(a);
-//    a->setPriority(QAction::LowPriority);
-//    a->setShortcut(QKeySequence::New);
-
-//    const QIcon openIcon = QIcon::fromTheme("document-open", QIcon(rsrcPath + "/fileopen.png"));
-//    a = menu->addAction(openIcon, tr("&Open..."), this, &TextEdit::fileOpen);
-//    a->setShortcut(QKeySequence::Open);
-//    tb->addAction(a);
-
-//    menu->addSeparator();
-
-//    const QIcon saveIcon = QIcon::fromTheme("document-save", QIcon(rsrcPath + "/filesave.png"));
-//    actionSave = menu->addAction(saveIcon, tr("&Save"), this, &TextEdit::fileSave);
-//    actionSave->setShortcut(QKeySequence::Save);
-//    actionSave->setEnabled(false);
-//    tb->addAction(actionSave);
-
-//    a = menu->addAction(tr("Save &As..."), this, &TextEdit::fileSaveAs);
-//    a->setPriority(QAction::LowPriority);
-//    menu->addSeparator();
 
 #ifndef QT_NO_PRINTER
-//    const QIcon printIcon = QIcon::fromTheme("document-print", QIcon(rsrcPath + "/fileprint.png"));
-//    a = menu->addAction(printIcon, tr("&Print..."), this, &TextEdit::filePrint);
-//    a->setPriority(QAction::LowPriority);
-//    a->setShortcut(QKeySequence::Print);
-//    tb->addAction(a);
-
-//    const QIcon filePrintIcon = QIcon::fromTheme("fileprint", QIcon(rsrcPath + "/fileprint.png"));
-//    menu->addAction(filePrintIcon, tr("Print Preview..."), this, &TextEdit::filePrintPreview);
 
     const QIcon exportPdfIcon = QIcon::fromTheme("exportpdf", QIcon(rsrcPath + "/exportpdf.png"));
     QAction *a = menu->addAction(exportPdfIcon, tr("&Export PDF..."), this, &TextEdit::filePrintPdf);
@@ -332,49 +294,6 @@ void TextEdit::setupTextActions()
 
     menu->addSeparator();
 
-    // for now align just breaks everything
-
-//    const QIcon leftIcon = QIcon::fromTheme("format-justify-left", QIcon(rsrcPath + "/textleft.png"));
-//    actionAlignLeft = new QAction(leftIcon, tr("&Left"), this);
-//    actionAlignLeft->setShortcut(Qt::CTRL + Qt::Key_L);
-//    actionAlignLeft->setCheckable(true);
-//    actionAlignLeft->setPriority(QAction::LowPriority);
-//    const QIcon centerIcon = QIcon::fromTheme("format-justify-center", QIcon(rsrcPath + "/textcenter.png"));
-//    actionAlignCenter = new QAction(centerIcon, tr("C&enter"), this);
-//    actionAlignCenter->setShortcut(Qt::CTRL + Qt::Key_E);
-//    actionAlignCenter->setCheckable(true);
-//    actionAlignCenter->setPriority(QAction::LowPriority);
-//    const QIcon rightIcon = QIcon::fromTheme("format-justify-right", QIcon(rsrcPath + "/textright.png"));
-//    actionAlignRight = new QAction(rightIcon, tr("&Right"), this);
-//    actionAlignRight->setShortcut(Qt::CTRL + Qt::Key_R);
-//    actionAlignRight->setCheckable(true);
-//    actionAlignRight->setPriority(QAction::LowPriority);
-//    const QIcon fillIcon = QIcon::fromTheme("format-justify-fill", QIcon(rsrcPath + "/textjustify.png"));
-//    actionAlignJustify = new QAction(fillIcon, tr("&Justify"), this);
-//    actionAlignJustify->setShortcut(Qt::CTRL + Qt::Key_J);
-//    actionAlignJustify->setCheckable(true);
-//    actionAlignJustify->setPriority(QAction::LowPriority);
-
-//    // Make sure the alignLeft  is always left of the alignRight
-//    QActionGroup *alignGroup = new QActionGroup(this);
-//    connect(alignGroup, &QActionGroup::triggered, this, &TextEdit::textAlign);
-
-//    if (QApplication::isLeftToRight()) {
-//        alignGroup->addAction(actionAlignLeft);
-//        alignGroup->addAction(actionAlignCenter);
-//        alignGroup->addAction(actionAlignRight);
-//    } else {
-//        alignGroup->addAction(actionAlignRight);
-//        alignGroup->addAction(actionAlignCenter);
-//        alignGroup->addAction(actionAlignLeft);
-//    }
-//    alignGroup->addAction(actionAlignJustify);
-
-//    tb->addActions(alignGroup->actions());
-//    menu->addActions(alignGroup->actions());
-
-//    menu->addSeparator();
-
     QPixmap pix(16, 16);
     pix.fill(Qt::black);
     actionTextColor = menu->addAction(pix, tr("&Color..."), this, &TextEdit::textColor);
@@ -422,48 +341,6 @@ void TextEdit::setupTextActions()
     connect(comboSize, QOverload<const QString &>::of(&QComboBox::activated), this, &TextEdit::textSize);
 }
 
-// maybe later change it with open another doc?
-
-//bool TextEdit::load(const QString &f)
-//{
-//    if (!QFile::exists(f))
-//        return false;
-//    QFile file(f);
-//    if (!file.open(QFile::ReadOnly))
-//        return false;
-
-//    QByteArray data = file.readAll();
-//    QTextCodec *codec = Qt::codecForHtml(data);
-//    QString str = codec->toUnicode(data);
-//    if (Qt::mightBeRichText(str)) {
-//        textEdit->setHtml(str);
-//    } else {
-//        str = QString::fromLocal8Bit(data);
-//        textEdit->setPlainText(str);
-//    }
-
-//    setCurrentFileName(f);
-//    return true;
-//}
-
-bool TextEdit::maybeSave()
-{
-    // I commented it out!!!!!
-//    if (!textEdit->document()->isModified())
-//        return true;
-
-//    const QMessageBox::StandardButton ret =
-//        QMessageBox::warning(this, QCoreApplication::applicationName(),
-//                             tr("The document has been modified.\n"
-//                                "Do you want to save your changes?"),
-//                             QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
-//    if (ret == QMessageBox::Save)
-//        return fileSave();
-//    else if (ret == QMessageBox::Cancel)
-//        return false;
-    return true;
-}
-
 void TextEdit::setCurrentFileName(const QString &fileName)
 {
     this->fileName = fileName;
@@ -479,100 +356,6 @@ void TextEdit::setCurrentFileName(const QString &fileName)
     setWindowModified(false);
 }
 
-//void TextEdit::fileNew()
-//{
-//    if (maybeSave()) {
-//        textEdit->clear();
-//        setCurrentFileName(QString());
-//    }
-
-//}
-
-// same as with load
-
-//void TextEdit::fileOpen()
-//{
-//    QFileDialog fileDialog(this, tr("Open File..."));
-//    fileDialog.setAcceptMode(QFileDialog::AcceptOpen);
-//    fileDialog.setFileMode(QFileDialog::ExistingFile);
-//    fileDialog.setMimeTypeFilters(QStringList() << "text/html" << "text/plain");
-//    if (fileDialog.exec() != QDialog::Accepted)
-//        return;
-//    const QString fn = fileDialog.selectedFiles().first();
-//    if (load(fn))
-//        statusBar()->showMessage(tr("Opened \"%1\"").arg(QDir::toNativeSeparators(fn)));
-//    else
-//        statusBar()->showMessage(tr("Could not open \"%1\"").arg(QDir::toNativeSeparators(fn)));
-//}
-
-//bool TextEdit::fileSave()
-//{
-//    if (fileName.isEmpty())
-//        return fileSaveAs();
-//    if (fileName.startsWith(QStringLiteral(":/")))
-//        return fileSaveAs();
-
-//    QTextDocumentWriter writer(fileName);
-//    bool success = writer.write(textEdit->document());
-//    if (success) {
-//        textEdit->document()->setModified(false);
-//        statusBar()->showMessage(tr("Wrote \"%1\"").arg(QDir::toNativeSeparators(fileName)));
-//    } else {
-//        statusBar()->showMessage(tr("Could not write to file \"%1\"")
-//                                 .arg(QDir::toNativeSeparators(fileName)));
-//    }
-//    return success;
-//}
-
-//bool TextEdit::fileSaveAs()
-//{
-//    QFileDialog fileDialog(this, tr("Save as..."));
-//    fileDialog.setAcceptMode(QFileDialog::AcceptSave);
-//    QStringList mimeTypes;
-//    mimeTypes << "application/vnd.oasis.opendocument.text" << "text/html" << "text/plain";
-//    fileDialog.setMimeTypeFilters(mimeTypes);
-//    fileDialog.setDefaultSuffix("odt");
-//    if (fileDialog.exec() != QDialog::Accepted)
-//        return false;
-//    const QString fn = fileDialog.selectedFiles().first();
-//    setCurrentFileName(fn);
-//    return fileSave();
-//}
-
-//void TextEdit::filePrint()
-//{
-//#if QT_CONFIG(printdialog)
-//    QPrinter printer(QPrinter::HighResolution);
-//    QPrintDialog *dlg = new QPrintDialog(&printer, this);
-//    if (textEdit->textCursor().hasSelection())
-//        dlg->addEnabledOption(QAbstractPrintDialog::PrintSelection);
-//    dlg->setWindowTitle(tr("Print Document"));
-//    if (dlg->exec() == QDialog::Accepted)
-//        textEdit->print(&printer);
-//    delete dlg;
-//#endif
-//}
-
-//void TextEdit::filePrintPreview()
-//{
-//#if QT_CONFIG(printpreviewdialog)
-//    QPrinter printer(QPrinter::HighResolution);
-//    QPrintPreviewDialog preview(&printer, this);
-//    connect(&preview, &QPrintPreviewDialog::paintRequested, this, &TextEdit::printPreview);
-//    preview.exec();
-//#endif
-//}
-
-//void TextEdit::printPreview(QPrinter *printer)
-//{
-//#ifdef QT_NO_PRINTER
-//    Q_UNUSED(printer);
-//#else
-//    textEdit->print(printer);
-//#endif
-//}
-
-
 void TextEdit::filePrintPdf()
 {
 #ifndef QT_NO_PRINTER
@@ -587,9 +370,28 @@ void TextEdit::filePrintPdf()
     QPrinter printer(QPrinter::HighResolution);
     printer.setOutputFormat(QPrinter::PdfFormat);
     printer.setOutputFileName(fileName);
-    textEdit->document()->print(&printer);
+
+    QTextDocument* doc = new QTextDocument();
+    QTextCursor pdf(doc);
+
+    pdf.beginEditBlock();
+    QTextCursor init(textEdit->document());
+    for(int i=0; !init.atEnd(); i++){
+        init.movePosition(QTextCursor::NextCharacter, QTextCursor::KeepAnchor);
+        QTextCharFormat newFormat(init.charFormat());
+        newFormat.clearBackground();
+        pdf.insertText(init.selectedText(), newFormat);
+        init.setPosition(i);
+    }
+    pdf.endEditBlock();
+
+
+    doc->print(&printer);
     statusBar()->showMessage(tr("Exported \"%1\"")
                              .arg(QDir::toNativeSeparators(fileName)));
+
+    delete doc;
+
 //! [0]
 #endif
 }
@@ -710,18 +512,6 @@ void TextEdit::textColor()
     colorChanged(col);
 }
 
-//void TextEdit::textAlign(QAction *a)
-//{
-//    if (a == actionAlignLeft)
-//        textEdit->setAlignment(Qt::AlignLeft | Qt::AlignAbsolute);
-//    else if (a == actionAlignCenter)
-//        textEdit->setAlignment(Qt::AlignHCenter);
-//    else if (a == actionAlignRight)
-//        textEdit->setAlignment(Qt::AlignRight | Qt::AlignAbsolute);
-//    else if (a == actionAlignJustify)
-//        textEdit->setAlignment(Qt::AlignJustify);
-//}
-
 void TextEdit::currentCharFormatChanged(const QTextCharFormat &format)
 {
     fontChanged(format.font());
@@ -731,8 +521,6 @@ void TextEdit::currentCharFormatChanged(const QTextCharFormat &format)
 void TextEdit::cursorPositionChanged()
 {
 
-
-    //alignmentChanged(textEdit->alignment());
     QTextList *list = textEdit->textCursor().currentList();
     if (list) {
         switch (list->format().style()) {
@@ -780,9 +568,7 @@ void TextEdit::clipboardDataChanged()
 
 void TextEdit::about()
 {
-    QMessageBox::about(this, tr("About"), tr("This example demonstrates Qt's "
-        "rich text editing facilities in action, providing an example "
-        "document for you to experiment with."));
+    QMessageBox::about(this, tr("About"), tr("This is our project"));
 }
 
 void TextEdit::mergeFormatOnWordOrSelection(const QTextCharFormat &format)
@@ -810,21 +596,6 @@ void TextEdit::colorChanged(const QColor &c)
     actionTextColor->setIcon(pix);
 }
 
-//void TextEdit::alignmentChanged(Qt::Alignment a)
-//{
-//    if (a & Qt::AlignLeft)
-//        actionAlignLeft->setChecked(true);
-//    else if (a & Qt::AlignHCenter)
-//        actionAlignCenter->setChecked(true);
-//    else if (a & Qt::AlignRight)
-//        actionAlignRight->setChecked(true);
-//    else if (a & Qt::AlignJustify)
-//        actionAlignJustify->setChecked(true);
-//}
-
-// ------------------------------------------------------------------------------------------------
-
-/* MY ADDS START */
 
 MyQTextEdit::MyQTextEdit(QWidget* p) : QTextEdit(p){
 
@@ -839,7 +610,6 @@ MyQTextEdit::MyQTextEdit(QWidget* p) : QTextEdit(p){
     tcpSocket = new QTcpSocket;
     loginInfo = new LoginInfo;
     Client client(this, tcpSocket, loginInfo);
-    //connect(&client, &Client::waitingDocu, this, &MyQTextEdit::docuReady);
     _siteId = client.exec();
     if(_siteId == 0) {
         exit(0);
@@ -849,23 +619,18 @@ MyQTextEdit::MyQTextEdit(QWidget* p) : QTextEdit(p){
     in.setVersion(QDataStream::Qt_4_0);
     connect(tcpSocket, &QIODevice::readyRead, this, &MyQTextEdit::readMessage);
 
-    //adjustHeight();
-
-    //container->show();
+    adjustHeight();
 
 }
 
-MyQTextEdit::~MyQTextEdit(){}                   // se tolgo questo non ho la vtable STUDIA!!!
-
-/* qdatastream operators */
+/* QDataStream operators */
 QDataStream &operator<<(QDataStream& out, const Symbol& sen){
-    QVector<int> qvect;
-    return out << sen.c << sen.count << sen.format << sen.siteid << qvect.fromStdVector(sen.fract);
+    return out << sen.c << sen.count << sen.format << sen.siteid <<QVector<int>(sen.fract.begin(), sen.fract.end());
 }
 QDataStream &operator>>(QDataStream& in, Symbol& rec){
     QVector<int> qvect;
     in >> rec.c >> rec.count >> rec.format >> rec.siteid >> qvect;
-    rec.fract = qvect.toStdVector();
+    rec.fract = std::vector<int>(qvect.begin(), qvect.end());
     return in;
 }
 
@@ -914,7 +679,7 @@ void MyQTextEdit::CatchChangeSignal(int pos, int rem, int add){
     std::vector<Symbol> _remNew;
 
     if(rem != 0){
-        if(rem > _symbols.size()){
+        if(rem > (int) _symbols.size()){
             if(add)
                 add -= rem - _symbols.size();
             rem = _symbols.size();
@@ -963,7 +728,7 @@ std::vector<int> MyQTextEdit::prefix(std::vector<int> id, int depth, int substit
 {
     std::vector<int> idCopy = {};
     for (int cpt = 0; cpt <= depth; cpt++) {
-        if (cpt < id.size()) {
+        if (cpt < (int) id.size()) {
             idCopy.push_back(id.at(cpt));
         }
         else {
@@ -977,8 +742,8 @@ void MyQTextEdit::localInsert(int index, QChar value, QTextCharFormat charFormat
 {
     std::vector<int> myfract = {};
 
-    auto before = _symbols.size() > index-1 ? _symbols.at(index-1).fract : std::vector<int>();
-    auto after = _symbols.size() > index ? _symbols.at(index).fract : std::vector<int>();
+    auto before = (int) _symbols.size() > index-1 ? _symbols.at(index-1).fract : std::vector<int>();
+    auto after = (int) _symbols.size() > index ? _symbols.at(index).fract : std::vector<int>();
 
     int depth = 0;
     int interval = 0;
@@ -1008,8 +773,6 @@ void MyQTextEdit::localErase(int i) {
 }
 
 void MyQTextEdit::paintEvent(QPaintEvent *event) {
-
-    //TODO: color users' nicks and paint them with the right composition mode
 
     // To draw everything else
     QTextEdit::paintEvent(event);
@@ -1089,7 +852,7 @@ int MyQTextEdit::fractcmp(Symbol s1, Symbol s2) {
 
     auto v1 = s1.fract;
     auto v2 = s2.fract;
-    while (v1.size() > digit && v2.size() > digit)
+    while ((int) v1.size() > digit && (int) v2.size() > digit)
     {
         cmp = v1.at(digit) - v2.at(digit);
         if(cmp!=0)
@@ -1098,10 +861,10 @@ int MyQTextEdit::fractcmp(Symbol s1, Symbol s2) {
     }
 
     // until now vectors are equal but one may continue
-    if(v1.size() > digit && v1.at(digit) > 0)
+    if((int) v1.size() > digit && v1.at(digit) > 0)
         return 1;
 
-    if(v2.size() > digit && v2.at(digit) == 0)
+    if((int) v2.size() > digit && v2.at(digit) == 0)
          return -1;
 
     cmp = s1.siteid - s2.siteid;
@@ -1207,16 +970,6 @@ void MyQTextEdit::adjustHeight()
     }
 }
 
-void MyQTextEdit::docuReady()
-{
-
-    adjustHeight();
-
-    connect(tcpSocket, &QIODevice::readyRead, this, &MyQTextEdit::readMessage);
-    in.setDevice(tcpSocket);
-    in.setVersion(QDataStream::Qt_4_0);
-}
-
 void MyQTextEdit::changeBgcolor(quint32 uid, QColor newColor){
 
     if(!_users.contains(uid)){
@@ -1249,16 +1002,6 @@ void MyQTextEdit::changeBgcolor(quint32 uid, QColor newColor){
         init.insertText(it->c, newFormat);
     }
     init.endEditBlock();
-
-//    for(auto it = _symbols.begin(); it!=_symbols.end(); it++, init.movePosition(QTextCursor::NextCharacter, QTextCursor::MoveAnchor, 1)){
-//        if(it->siteid == uid) {
-//            QTextCharFormat newFormat(it->format);
-//            newFormat.setBackground(newColor);
-//            init.deleteChar();
-//            init.movePosition(QTextCursor::PreviousCharacter, QTextCursor::MoveAnchor, 1);
-//            init.insertText(it->c, newFormat);
-//        }
-//    }
 
     connect(document(), &QTextDocument::contentsChange,
             this, &MyQTextEdit::CatchChangeSignal);
@@ -1348,8 +1091,13 @@ void MyQTextEdit::generateLink()
     clipboard->setText(link.toString());
     QMessageBox msgBox;
     msgBox.setTextInteractionFlags(Qt::TextInteractionFlag::TextSelectableByMouse);
-    msgBox.setText("The link copied in your clipboard " + link.toString());
+    msgBox.setText("The link copied in your clipboard: " + link.toString());
     msgBox.exec();
+}
+
+LoginInfo *MyQTextEdit::getLoginInfo() const
+{
+    return loginInfo;
 }
 
 void MyQTextEdit::insertSymbols(){
@@ -1367,11 +1115,4 @@ void MyQTextEdit::insertSymbols(){
 
     qDebug() << "document text received: " << document()->toPlainText();
 
-//    // cerca errori
-
-//    for(auto it = _symbols.begin(); it != _symbols.end(); it++){
-//        if(it!=_symbols.end()-1)
-//            if(fractcmp(*it, *(it+1)) > 0)
-//                qDebug() << "error found!!!";
-//    }
 }
