@@ -104,6 +104,7 @@ class MyQTextEdit: public QTextEdit{
 public:
     MyQTextEdit(QWidget* p);
     QWidget* container;
+    LoginInfo *getLoginInfo() const;
 public slots:
     void changeBgcolor(quint32, QColor);
     void updateProfile();

@@ -136,14 +136,14 @@ TextEdit::TextEdit(QWidget *parent)
     fontChanged(textEdit->font());
     colorChanged(textEdit->textColor());
 
-    connect(textEdit->document(), &QTextDocument::modificationChanged,
-            this, &QWidget::setWindowModified);
+//    connect(textEdit->document(), &QTextDocument::modificationChanged,
+//            this, &QWidget::setWindowModified);
     connect(textEdit->document(), &QTextDocument::undoAvailable,
             actionUndo, &QAction::setEnabled);
     connect(textEdit->document(), &QTextDocument::redoAvailable,
             actionRedo, &QAction::setEnabled);
 
-    setWindowModified(textEdit->document()->isModified());
+//    setWindowModified(textEdit->document()->isModified());
     actionUndo->setEnabled(textEdit->document()->isUndoAvailable());
     actionRedo->setEnabled(textEdit->document()->isRedoAvailable());
 
@@ -157,7 +157,7 @@ TextEdit::TextEdit(QWidget *parent)
 #endif
 
     textEdit->setFocus();
-    setCurrentFileName(QString());
+    setCurrentFileName(textEdit->getLoginInfo()->file);
 
 #ifdef Q_OS_MACOS
     // Use dark text on light background on macOS, also in dark mode.
@@ -1093,6 +1093,11 @@ void MyQTextEdit::generateLink()
     msgBox.setTextInteractionFlags(Qt::TextInteractionFlag::TextSelectableByMouse);
     msgBox.setText("The link copied in your clipboard: " + link.toString());
     msgBox.exec();
+}
+
+LoginInfo *MyQTextEdit::getLoginInfo() const
+{
+    return loginInfo;
 }
 
 void MyQTextEdit::insertSymbols(){
