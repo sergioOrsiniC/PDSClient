@@ -9,11 +9,11 @@ class User{
 public:
     User(quint32 u, QString n, QColor col, int tc): uid(u), nick(n), color(col), startCursor(tc){}
     User(){}
-    quint32 uid = 0;                                // se faccio map<int, user> non serve, la uso come chiave
+    quint32 uid = 0;
     QString nick = "";
     QColor color = QColor();
     int startCursor = 0;
-    QImage icon =  QImage();                    // controllare il tipo
+    QImage icon =  QImage();
 };
 
 #endif // USER_H

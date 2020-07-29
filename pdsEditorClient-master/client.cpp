@@ -265,7 +265,7 @@ void Client::sessionOpened()
 {
 
     statusLabel->setText(tr("This examples requires that you run the "
-                            "Fortune Server example as well."));
+                            "TextEdit Server as well."));
 
     enableGetFortuneButton();
 }
@@ -308,7 +308,7 @@ void Client::loginRead()
         }
         else {
             qDebug() << "loginread failed: " << " op was" << (char) op;
-            QMessageBox::information(this, tr("Client Editor") ,
+            QMessageBox::information(this, tr("TextEdit") ,
                                      tr("Utente Non trovato"));
             //FAIL
         }
@@ -326,7 +326,7 @@ void Client::fileTry()
     bool present = _files.contains(fileCombo->currentText());
     if(openCombo->currentText()=="open"){
         if(!present){
-            QMessageBox::information(this, tr("Fortune Client"),
+            QMessageBox::information(this, tr("TextEdit"),
                                      tr("No file found"));
             return;
         }
@@ -334,7 +334,7 @@ void Client::fileTry()
     }
     else if(openCombo->currentText()=="new"){
         if(present){
-            QMessageBox::information(this, tr("Fortune Client"),
+            QMessageBox::information(this, tr("TextEdit"),
                                      tr("Name already used"));
             return;
         }
@@ -351,7 +351,6 @@ void Client::fileTry()
     qDebug() << portLineEdit->text().toInt();
     loginInfo->port = portLineEdit->text().toInt();
 
-    //emit waitingDocu();
     tcpSocket->flush();
     tcpSocket->write(block);
     this->done(uid);
