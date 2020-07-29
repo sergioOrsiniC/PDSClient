@@ -839,11 +839,17 @@ MyQTextEdit::MyQTextEdit(QWidget* p) : QTextEdit(p){
     tcpSocket = new QTcpSocket;
     loginInfo = new LoginInfo;
     Client client(this, tcpSocket, loginInfo);
-    connect(&client, &Client::waitingDocu, this, &MyQTextEdit::docuReady);
+    //connect(&client, &Client::waitingDocu, this, &MyQTextEdit::docuReady);
     _siteId = client.exec();
     if(_siteId == 0) {
         exit(0);
     }
+
+    in.setDevice(tcpSocket);
+    in.setVersion(QDataStream::Qt_4_0);
+    connect(tcpSocket, &QIODevice::readyRead, this, &MyQTextEdit::readMessage);
+
+    //adjustHeight();
 
     //container->show();
 

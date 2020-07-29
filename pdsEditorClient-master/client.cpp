@@ -375,6 +375,8 @@ void Client::fileTry()
         }
         op = 'n';
     }
+    disconnect(tcpSocket, &QIODevice::readyRead, this, &Client::loginRead);
+
     out << op;
 
     out << fileCombo->currentText();
@@ -384,8 +386,7 @@ void Client::fileTry()
     qDebug() << portLineEdit->text().toInt();
     loginInfo->port = portLineEdit->text().toInt();
 
-    emit waitingDocu();
-    disconnect(tcpSocket, &QIODevice::readyRead, this, &Client::loginRead);
+    //emit waitingDocu();
     tcpSocket->flush();
     tcpSocket->write(block);
     this->done(uid);
