@@ -102,6 +102,7 @@ const QString rsrcPath = ":/images/mac";
 const QString rsrcPath = ":/images/win";
 #endif
 
+#define MAXSYMPERMSG 1000
 
 TextEdit::TextEdit(QWidget *parent)
     : QMainWindow(parent)
@@ -712,15 +713,70 @@ void MyQTextEdit::CatchChangeSignal(int pos, int rem, int add){
 
     }
 
-    QByteArray block;
-    QDataStream out(&block, QIODevice::WriteOnly);
-    out.setVersion(QDataStream::Qt_4_0);
 
-    qDebug("sending a message");
-    out << 'm';
-    out << Message(add, rem, _siteId, _add, _rem);
+    // bufferizzare qui
+    QList<Symbol> _badd = {};
+    QList<Symbol> _brem = {};
 
-    tcpSocket->write(block);
+    int bsize = 0;
+    int bpos = 0;
+
+    //add
+    while(add > 0){
+
+        if(add > MAXSYMPERMSG)
+            bsize = MAXSYMPERMSG;
+        else
+            bsize = add;
+
+        add -= bsize;
+
+        _badd = {_add.begin()+bpos, _add.begin()+bpos+bsize};
+
+        bpos += bsize;
+
+        QByteArray block;
+        QDataStream out(&block, QIODevice::WriteOnly);
+        out.setVersion(QDataStream::Qt_4_0);
+
+        qDebug("sending a message");
+        out << 'm';
+        out << Message(bsize, 0, _siteId, _badd, _brem);
+
+        tcpSocket->write(block);
+    }
+
+    _brem = {};
+    _badd = {};
+    bsize = 0;
+    bpos = 0;
+
+    //rem
+    while(rem > 0){
+
+        if(rem > MAXSYMPERMSG)
+            bsize = MAXSYMPERMSG;
+        else
+            bsize = rem;
+
+        rem -= bsize;
+
+        _brem = {_rem.begin()+bpos, _rem.begin()+bpos+bsize};
+
+        bpos += bsize;
+
+        QByteArray block;
+        QDataStream out(&block, QIODevice::WriteOnly);
+        out.setVersion(QDataStream::Qt_4_0);
+
+        qDebug("sending a message");
+        out << 'm';
+        out << Message(0, bsize, _siteId, _badd, _brem);
+
+        tcpSocket->write(block);
+    }
+
+
 
 }
 
