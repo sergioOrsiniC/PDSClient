@@ -742,7 +742,7 @@ void MyQTextEdit::localInsert(int index, QChar value, QTextCharFormat charFormat
 {
     std::vector<int> myfract = {};
 
-    auto before = (int) _symbols.size() > index-1 ? _symbols.at(index-1).fract : std::vector<int>();
+    auto before = (int) _symbols.size() > index-1 && index > 0 ? _symbols.at(index-1).fract : std::vector<int>();
     auto after = (int) _symbols.size() > index ? _symbols.at(index).fract : std::vector<int>();
 
     int depth = 0;
